@@ -179,6 +179,7 @@ namespace DCI {
       Bool has_ineq, is_linear, is_bounded;
       Bool is_unlimited;
       Int display_level, debug_level, verbosity_level, table_print_level;
+      Bool print_A_at_end;
       Int exit_flag;
       Real max_time, current_time, start_time;
 
@@ -194,6 +195,7 @@ namespace DCI {
       Real phi1, phi2;
       Real csic, csig;
       Real zeta1, zeta2, zeta3;
+      Real beta1, beta2;
       Real kappa1, kappa2, kappa3, kappa4;
       Real thetaR, LbdMax;
       Bool GotH, first;
@@ -211,7 +213,8 @@ namespace DCI {
       Bool normal_fail_reboot;
       Bool partial_penalization, project_dcp, project_dn, project_bfgs;
       Bool trustWorstdn, trustConvexBox, penal_trust, penal_bfgs;
-      Real cholesky_correction;
+      Real cholesky_correction, chol_correction_increase,
+           cholesky_base_correction;
       Bool cholesky_failed;
       Real MaxDiag, MinDiag;
       Real infeasible_gradient;
@@ -219,8 +222,9 @@ namespace DCI {
            max_variable_scaling;
       Real *constraint_scaling;
       Bool use_objective_scaling, use_variable_scaling, use_constraint_scaling;
-      Bool use_soc;
+      Bool use_soc, use_normal_safe_guard;
       Int  objfun_count;
+      Real infeasibility_tol;
       Int  nfix, *fixed_index;
       Bool *fixed;
       Int  cuter_status;

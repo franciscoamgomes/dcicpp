@@ -10,36 +10,38 @@ namespace DCI {
 
   void Interface::defineParameters () {
     DeltaMax = 1e6;
-    maxrest = 200;
-    maxit = 200;
+    maxrest = 200000;
+    maxit = 200000;
     maxssmll = 5;
     maxitSteih = 100000;
     minitSteih = 100;
     relitSteih = 10;
-    nfailv = 3;
+    nfailv = 5;
     csic = 1e-6;
     csig = 1e-6;
     rhomin = 1e-8;
-    phi1 = 1;
-    phi2 = 0.95;
+    phi1 = 1.0;
+    phi2 = 0.99;
     kappa1 = 1e-4;
     kappa2 = 0.25;
     kappa3 = 0.7;
     kappa4 = 2.5;
+    beta1 = 0.1;
+    beta2 = 0.25;
     zeta1 = 2;
     zeta2 = 1;
     zeta3 = 5;
-    alphaR = 0.25;
+    alphaR = 0.75;
     alphaI = 2.5;
     alphaS = 6.25e-2;
-    eta1 = 1e-4;
-    eta2 = 0.7;
-    eta3 = 0.1;
+    eta1 = 1e-3;
+    eta2 = 0.2;
+    eta3 = 0.9;
     DeltaMin = 1e-4;
     DeltaTiny = 1e-10;
     minstep = 1e-3;
-    Delta0 = 1e5;
-    thetaR = 0.9;
+    Delta0 = 1e6;
+    thetaR = 0.99;
     LbdMax = 1e6;
     eps1 = 1e-6;
     eps2 = 1e-14;
@@ -49,13 +51,14 @@ namespace DCI {
     bfgsupd = 5;
     c1 = 0.5;
     c2 = 5e-1;
-    max_time = 5 * 60; // 5 minutes
+    max_time = 300; // 5 minutes
     minBk = 1e-12;
     display_level = 1;
     debug_level = 0;
     verbosity_level = 0;
     table_print_level = 0;
-    MaxDiag = 1e20;
+    print_A_at_end = false;
+    MaxDiag = 1e9;
     MinDiag = 0;
     max_objective_scaling = 1e6;
     max_constraint_scaling = 1e6;
@@ -68,39 +71,46 @@ namespace DCI {
 
   void Interface::readParameters () {
     std::ifstream paramFile("dcicpp.spc");
-    if (paramFile.fail())
-      return;
+    bool has_param_file = !(paramFile.fail());
 
-    enum parameters {en_DeltaMax, en_maxrest, en_maxit, en_maxssmll, en_maxitSteih,
-      en_minitSteih, en_relitSteih, en_nfailv, en_csic, en_csig, en_rhomin, en_phi1,
-      en_phi2, en_kappa1, en_kappa2, en_kappa3, en_kappa4, en_zeta1, en_zeta2,
-      en_zeta3, en_alphaR, en_alphaI, en_alphaS, en_eta1, en_eta2, en_eta3,
-      en_DeltaMin, en_DeltaTiny, en_minstep, en_Delta0, en_thetaR, en_LbdMax,
-      en_eps1, en_eps2, en_eps3, en_epsmu, en_epsgap, en_bfgsupd, en_c1, en_c2,
-      en_max_time, en_minBk, en_use_conjugate_gradient, en_partial_penalization, en_project_dcp,
+    enum parameters {en_DeltaMax, en_maxrest, en_maxit, en_maxssmll,
+      en_maxitSteih, en_minitSteih, en_relitSteih, en_nfailv, en_csic, en_csig,
+      en_rhomin, en_phi1, en_phi2, en_kappa1, en_kappa2, en_kappa3, en_kappa4,
+      en_zeta1, en_zeta2, en_beta1, en_beta2, en_zeta3, en_alphaR, en_alphaI,
+      en_alphaS, en_eta1, en_eta2, en_eta3, en_DeltaMin, en_DeltaTiny,
+      en_minstep, en_Delta0, en_thetaR, en_LbdMax, en_eps1, en_eps2, en_eps3,
+      en_epsmu, en_epsgap, en_bfgsupd, en_c1, en_c2, en_max_time, en_minBk,
+      en_use_conjugate_gradient, en_partial_penalization, en_project_dcp,
       en_project_bfgs, en_trustWorstdn, en_trustConvexBox, en_penal_trust,
       en_penal_bfgs, en_scale_normal, en_display_level, en_debug_level,
-      en_verbosity_level, en_MaxDiag, en_MinDiag,
+      en_verbosity_level, en_print_A_at_end, en_MaxDiag, en_MinDiag,
       en_use_objective_scaling, en_objfun_count, en_use_constraint_scaling,
       en_max_objective_scaling, en_use_variable_scaling, en_table_print_level,
       en_max_constraint_scaling, en_max_variable_scaling, en_use_soc,
-      en_nvarshowmax, en_nconshowmax, en_normal_fail_reboot
+      en_use_normal_safe_guard, en_nvarshowmax, en_nconshowmax,
+      en_normal_fail_reboot, en_chol_correction_increase,
+      en_cholesky_base_correction, en_infeasibility_tol
     };
     std::map<std::string, int> paramMap;
 
     paramMap["normal_fail_reboot"] = en_normal_fail_reboot;
+    paramMap["chol_correction_increase"] = en_chol_correction_increase;
+    paramMap["cholesky_base_correction"] = en_cholesky_base_correction;
     paramMap["MaxDiag"] = en_MaxDiag;
     paramMap["MinDiag"] = en_MinDiag;
     paramMap["debug_level"] = en_debug_level;
     paramMap["verbosity_level"] = en_verbosity_level;
     paramMap["display_level"] = en_display_level;
     paramMap["table_print_level"] = en_table_print_level;
+    paramMap["print_A_at_end"] = en_print_A_at_end;
     paramMap["scale_normal"] = en_scale_normal;
     paramMap["use_conjugate_gradient"] = en_use_conjugate_gradient;
     paramMap["use_objective_scaling"] = en_use_objective_scaling;
     paramMap["use_soc"] = en_use_soc;
+    paramMap["use_normal_safe_guard"] = en_use_normal_safe_guard;
     paramMap["use_constraint_scaling"] = en_use_constraint_scaling;
     paramMap["objfun_count"] = en_objfun_count;
+    paramMap["infeasibility_tol"] = en_infeasibility_tol;
     paramMap["max_objective_scaling"] = en_max_objective_scaling;
     paramMap["max_constraint_scaling"] = en_max_constraint_scaling;
     paramMap["max_variable_scaling"] = en_max_variable_scaling;
@@ -129,6 +139,8 @@ namespace DCI {
     paramMap["kappa2"] = en_kappa2;
     paramMap["kappa3"] = en_kappa3;
     paramMap["kappa4"] = en_kappa4;
+    paramMap["beta1"] = en_beta1;
+    paramMap["beta2"] = en_beta2;
     paramMap["zeta1"] = en_zeta1;
     paramMap["zeta2"] = en_zeta2;
     paramMap["zeta3"] = en_zeta3;
@@ -157,6 +169,9 @@ namespace DCI {
     paramMap["nvarshowmax"] = en_nvarshowmax;
     paramMap["nconshowmax"] = en_nconshowmax;
 
+    if (!has_param_file)
+      return;
+
     std::string param, value;
 
     if (debug_level > 0) {
@@ -180,12 +195,15 @@ namespace DCI {
 
       switch (choice) {
         case en_normal_fail_reboot: aux >> normal_fail_reboot; break;
+        case en_chol_correction_increase: aux >> chol_correction_increase; break;
+        case en_cholesky_base_correction: aux >> cholesky_base_correction; break;
         case en_MaxDiag: aux >> MaxDiag; break;
         case en_MinDiag: aux >> MinDiag; break;
         case en_debug_level: aux >> debug_level; break;
         case en_verbosity_level: aux >> verbosity_level; break;
         case en_display_level: aux >> display_level; break;
         case en_table_print_level: aux >> table_print_level; break;
+        case en_print_A_at_end: aux >> print_A_at_end; break;
         case en_DeltaMax: aux >> DeltaMax; break;
         case en_maxrest: aux >> maxrest; break;
         case en_maxit: aux >> maxit; break;
@@ -203,6 +221,8 @@ namespace DCI {
         case en_kappa2: aux >> kappa2; break;
         case en_kappa3: aux >> kappa3; break;
         case en_kappa4: aux >> kappa4; break;
+        case en_beta1: aux >> beta1; break;
+        case en_beta2: aux >> beta2; break;
         case en_zeta1: aux >> zeta1; break;
         case en_zeta2: aux >> zeta2; break;
         case en_zeta3: aux >> zeta3; break;
@@ -231,8 +251,10 @@ namespace DCI {
         case en_use_conjugate_gradient: aux >> use_conjugate_gradient; break;
         case en_use_objective_scaling: aux >> use_objective_scaling; break;
         case en_use_soc: aux >> use_soc; break;
+        case en_use_normal_safe_guard: aux >> use_normal_safe_guard; break;
         case en_use_constraint_scaling: aux >> use_constraint_scaling; break;
         case en_objfun_count: aux >> objfun_count; break;
+        case en_infeasibility_tol: aux >> infeasibility_tol; break;
         case en_max_objective_scaling: aux >> max_objective_scaling; break;
         case en_max_constraint_scaling: aux >> max_constraint_scaling; break;
         case en_max_variable_scaling: aux >> max_variable_scaling; break;
@@ -333,13 +355,15 @@ namespace DCI {
     scaling_matrix = 0;
     cholesky_correction = 0;
     cholesky_failed = dciFalse;
-    objfun_count = 0;
+    objfun_count = 10;
+    infeasibility_tol = 1e-6;
 
     //Strategy choices
     use_conjugate_gradient = dciFalse;
     use_objective_scaling = dciTrue;
-    use_soc = dciFalse;
-    use_constraint_scaling = dciTrue;
+    use_soc = dciTrue;
+    use_normal_safe_guard = dciTrue;
+    use_constraint_scaling = dciFalse;
     use_variable_scaling = dciTrue;
     partial_penalization = dciTrue;
     project_dcp = dciFalse;
@@ -347,10 +371,12 @@ namespace DCI {
     project_bfgs = dciTrue;
     trustWorstdn = dciFalse;
     trustConvexBox = dciFalse;
-    penal_trust = dciTrue;
-    penal_bfgs = dciTrue;
-    scale_normal = dciTrue;
+    penal_trust = dciFalse;
+    penal_bfgs = dciFalse;
+    scale_normal = dciFalse;
     normal_fail_reboot = dciTrue;
+    chol_correction_increase = 10;
+    cholesky_base_correction = 1e-12;
 
     //Program properties
     has_ineq = dciFalse; //Has some inequalities
