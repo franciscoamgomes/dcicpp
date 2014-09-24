@@ -459,7 +459,7 @@ cd ${WorkingDir}
 
 # Link all the PACK and tools files together. (Modified for dcicpp)
 (( OUTPUT )) && printf '\nLinking all the object files together ...\n'
-command="g++ -o run_${PACKAGE} ELFUN.o GROUP.o RANGE.o ${EXTER} ${CUTEST}/objects/${ARCH}/${PRECISION}/${DRIVER}.o ${PACKOBJS[@]} ${ALT_LIB_PATH[@]} -L${LIBDIR} ${PACKLIBS} ${SPECIALLIBS} -lcutest ${BLAS} ${LAPACK} ${XTRALIBS[@]}"
+command="icpc -o run_${PACKAGE} ELFUN.o GROUP.o RANGE.o ${EXTER} ${CUTEST}/objects/${ARCH}/${PRECISION}/${DRIVER}.o ${PACKOBJS[@]} ${ALT_LIB_PATH[@]} -L${LIBDIR} ${PACKLIBS} ${SPECIALLIBS} -lcutest ${BLAS} ${LAPACK} ${XTRALIBS[@]}"
 (( show_commands )) && echo "$command"
 $command
 
